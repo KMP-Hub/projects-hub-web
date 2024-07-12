@@ -35,6 +35,10 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+
+            implementation("io.ktor:ktor-client-core:3.0.0-wasm1")
+            implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.0-wasm1")
+            implementation("io.ktor:ktor-client-content-negotiation:3.0.0-wasm1")
         }
     }
 }
