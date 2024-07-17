@@ -28,8 +28,9 @@ kotlin {
     }
     
     sourceSets {
-        
         commonMain.dependencies {
+            val voyagerVersion = "1.1.0-beta02"
+
             implementation(compose.runtime)
             implementation(compose.foundation)
             implementation(compose.material3)
@@ -40,6 +41,8 @@ kotlin {
             implementation("io.ktor:ktor-client-core:3.0.0-wasm1")
             implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.0-wasm1")
             implementation("io.ktor:ktor-client-content-negotiation:3.0.0-wasm1")
+            implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
+            implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
         }
     }
 }
