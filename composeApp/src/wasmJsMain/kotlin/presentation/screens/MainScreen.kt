@@ -3,6 +3,7 @@
 package presentation.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -195,9 +196,9 @@ fun ContentWidget(projects: List<Project>, showTopAction: Boolean) {
 
 @Composable
 fun DialogCheckboxItem(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { onCheckedChange(!checked) }) {
         Checkbox(checked, onCheckedChange = onCheckedChange)
-        Text(label)
+        Text(label, modifier = Modifier.padding(end = 16.dp))
     }
 }
 

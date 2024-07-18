@@ -43,11 +43,13 @@ class MainViewModel(private val repository: ProjectRepository) : ScreenModel {
 
     fun applyPlatformFilter(state: PlatformCheckState) {
         platformChecks.value = state
+        dialogSelectedPlatformChecks.value = state
         filter()
     }
 
     fun applyTypeFilter(state: TypeCheckState) {
         typeChecks.value = state
+        dialogSelectedTypeChecks.value = state
         filter()
     }
 
