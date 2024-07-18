@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,13 +19,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import cafe.adriel.voyager.core.screen.Screen
 import domain.entities.Project
 import domain.entities.ProjectType
 import domain.entities.SupportedPlatform
+import kmp_project.composeapp.generated.resources.*
 import kmp_project.composeapp.generated.resources.Res
 import kmp_project.composeapp.generated.resources.brightness
 import kmp_project.composeapp.generated.resources.github
@@ -39,13 +41,14 @@ class MainScreen : Screen {
     @Composable
     override fun Content() {
         val viewModel: MainViewModel = koinInject()
-        val projects by viewModel.projects
+        val fullProjects by viewModel.fullProjects
+        val filteredProject by viewModel.filteredProjects
         val loading by viewModel.loading
         val error by viewModel.errorMessage
         val themeSwitched by viewModel.themeSwitched
         val screenWidth = LocalWindowInfo.current.containerSize.width.dp
 
-        if (projects.isEmpty() && loading.not() && error == null) {
+        if (fullProjects.isEmpty() && loading.not() && error == null) {
             viewModel.loadProjects()
         }
 
@@ -59,9 +62,9 @@ class MainScreen : Screen {
 
         MaterialTheme(colorScheme = colors) {
             if (isNarrowScreen) {
-                ContentWidget(projects, showTopActions = true)
+                ContentWidget(filteredProject, showTopAction = true)
             } else {
-                WideScreen(projects)
+                WideScreen(filteredProject)
             }
         }
     }
@@ -69,32 +72,23 @@ class MainScreen : Screen {
 
 @Composable
 fun WideScreen(projects: List<Project>) {
-    // platform
-    var androidChecked by remember { mutableStateOf(true) }
-    var iosChecked by remember { mutableStateOf(true) }
-    var desktopChecked by remember { mutableStateOf(true) }
-    var webChecked by remember { mutableStateOf(true) }
-
-    // type
-    var libraryChecked by remember { mutableStateOf(true) }
-    var showcaseChecked by remember { mutableStateOf(true) }
-    var frameworkChecked by remember { mutableStateOf(true) }
-    var toolChecked by remember { mutableStateOf(true) }
-    var otherChecked by remember { mutableStateOf(true) }
+    val viewModel: MainViewModel = koinInject()
+    val platformChecks by viewModel.platformChecks
+    val typeChecks by viewModel.typeChecks
 
     val platformItems = listOf(
-        SupportedPlatform.Android to androidChecked,
-        SupportedPlatform.iOS to iosChecked,
-        SupportedPlatform.Desktop to desktopChecked,
-        SupportedPlatform.Web to webChecked
+        SupportedPlatform.Android to platformChecks.androidChecked,
+        SupportedPlatform.iOS to platformChecks.iosChecked,
+        SupportedPlatform.Desktop to platformChecks.desktopChecked,
+        SupportedPlatform.Web to platformChecks.webChecked
     )
 
     val typeItems = listOf(
-        ProjectType.Library to libraryChecked,
-        ProjectType.Showcase to showcaseChecked,
-        ProjectType.Framework to frameworkChecked,
-        ProjectType.Tool to toolChecked,
-        ProjectType.Other to otherChecked
+        ProjectType.Library to typeChecks.libraryChecked,
+        ProjectType.Showcase to typeChecks.showcaseChecked,
+        ProjectType.Framework to typeChecks.frameworkChecked,
+        ProjectType.Tool to typeChecks.toolChecked,
+        ProjectType.Other to typeChecks.otherChecked
     )
 
     PermanentNavigationDrawer(
@@ -103,27 +97,37 @@ fun WideScreen(projects: List<Project>) {
             ModalDrawerSheet(modifier = Modifier.width(240.dp)) {
                 Text("Platforms", modifier = Modifier.padding(16.dp))
                 HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp))
-                platformItems.forEachIndexed { index, (platform, checked) ->
-                    CheckboxItem(label = platform.name, checked = checked) {
-                        when (index) {
-                            0 -> androidChecked = it
-                            1 -> iosChecked = it
-                            2 -> desktopChecked = it
-                            3 -> webChecked = it
+                platformItems.forEach { (platform, checked) ->
+                    DrawerCheckboxItem(label = platform.name, checked = checked) { newCheckState ->
+                        when (platform) {
+                            SupportedPlatform.Android -> viewModel.applyPlatformFilter(
+                                platformChecks.copy(
+                                    androidChecked = newCheckState
+                                )
+                            )
+
+                            SupportedPlatform.iOS -> viewModel.applyPlatformFilter(platformChecks.copy(iosChecked = newCheckState))
+                            SupportedPlatform.Desktop -> viewModel.applyPlatformFilter(
+                                platformChecks.copy(
+                                    desktopChecked = newCheckState
+                                )
+                            )
+
+                            SupportedPlatform.Web -> viewModel.applyPlatformFilter(platformChecks.copy(webChecked = newCheckState))
                         }
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Types", modifier = Modifier.padding(16.dp))
                 HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp))
-                typeItems.forEachIndexed { index, (type, checked) ->
-                    CheckboxItem(label = type.name, checked = checked) {
-                        when (index) {
-                            0 -> libraryChecked = it
-                            1 -> showcaseChecked = it
-                            2 -> frameworkChecked = it
-                            3 -> toolChecked = it
-                            4 -> otherChecked = it
+                typeItems.forEach { (type, checked) ->
+                    DrawerCheckboxItem(label = type.name, checked = checked) { newCheckState ->
+                        when (type) {
+                            ProjectType.Library -> viewModel.applyTypeFilter(typeChecks.copy(libraryChecked = newCheckState))
+                            ProjectType.Showcase -> viewModel.applyTypeFilter(typeChecks.copy(showcaseChecked = newCheckState))
+                            ProjectType.Framework -> viewModel.applyTypeFilter(typeChecks.copy(frameworkChecked = newCheckState))
+                            ProjectType.Tool -> viewModel.applyTypeFilter(typeChecks.copy(toolChecked = newCheckState))
+                            ProjectType.Other -> viewModel.applyTypeFilter(typeChecks.copy(otherChecked = newCheckState))
                         }
                     }
                 }
@@ -131,13 +135,13 @@ fun WideScreen(projects: List<Project>) {
         }
     ) {
         // Screen content
-        ContentWidget(projects, showTopActions = false)
+        ContentWidget(projects, showTopAction = false)
     }
 }
 
 
 @Composable
-fun CheckboxItem(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+fun DrawerCheckboxItem(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     NavigationDrawerItem(
         label = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -151,9 +155,11 @@ fun CheckboxItem(label: String, checked: Boolean, onCheckedChange: (Boolean) -> 
 }
 
 @Composable
-fun ContentWidget(projects: List<Project>, showTopActions: Boolean) {
-    val inputValue = remember { mutableStateOf(TextFieldValue()) }
-    Scaffold(topBar = { MainTopBar() }) { paddingValues ->
+fun ContentWidget(projects: List<Project>, showTopAction: Boolean) {
+    val viewModel = koinInject<MainViewModel>()
+    val showFilterDialog by viewModel.showFilterDialog
+    val searchKeyword by viewModel.searchKeyword
+    Scaffold(topBar = { MainTopBar(showTopAction) }, bottomBar = { MainBottomBar() }) { paddingValues ->
         Column(
             Modifier.fillMaxWidth().padding(
                 top = paddingValues.calculateTopPadding(),
@@ -161,8 +167,8 @@ fun ContentWidget(projects: List<Project>, showTopActions: Boolean) {
             ), horizontalAlignment = Alignment.CenterHorizontally
         ) {
             TextField(
-                value = inputValue.value,
-                onValueChange = { newValue -> inputValue.value = newValue },
+                value = searchKeyword,
+                onValueChange = { newValue -> viewModel.applySearchKeyword(newValue) },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp),
                 singleLine = true,
                 shape = CircleShape,
@@ -180,27 +186,100 @@ fun ContentWidget(projects: List<Project>, showTopActions: Boolean) {
                 }
             }
         }
+
+        if (showFilterDialog) {
+            FilterDialog()
+        }
     }
 }
 
 @Composable
-fun MainTopBar() {
+fun FilterCheckboxItem(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(checked, onCheckedChange = onCheckedChange)
+        Text(label)
+    }
+}
+
+@Composable
+fun FilterDialog() {
+    val viewModel = koinInject<MainViewModel>()
+    BasicAlertDialog(
+        modifier = Modifier.defaultMinSize(minWidth = 280.dp)
+            .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(28.dp)),
+        onDismissRequest = {},
+        properties = DialogProperties()
+    ) {
+        Column(modifier = Modifier.padding(24.dp)) {
+            Text("Filters", fontSize = MaterialTheme.typography.headlineSmall.fontSize)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(false, onCheckedChange = {})
+                Text(SupportedPlatform.Android.name)
+            }
+            Row {
+                Checkbox(false, onCheckedChange = {})
+                Text("Android")
+            }
+            Row {
+                Checkbox(false, onCheckedChange = {})
+                Text("Android")
+            }
+            Row {
+                Checkbox(false, onCheckedChange = {})
+                Text("Android")
+            }
+            Row {
+                Checkbox(false, onCheckedChange = {})
+                Text("Android")
+            }
+            Row(modifier = Modifier.align(Alignment.End)) {
+                TextButton(onClick = { viewModel.showFilterDialog.value = false }) { Text("Cancel") }
+                Spacer(modifier = Modifier.width(8.dp))
+                TextButton(onClick = { viewModel.showFilterDialog.value = false }) { Text("Apply") }
+            }
+        }
+    }
+}
+
+@Composable
+fun MainBottomBar() {
     val viewModel = koinInject<MainViewModel>()
     val handler = LocalUriHandler.current
+    BottomAppBar {
+        IconButton(onClick = { handler.openUri("https://github.com/KMP-Hub") }) {
+            Icon(
+                painterResource(Res.drawable.github),
+                "GitHub repo"
+            )
+        }
+        IconButton(onClick = { viewModel.themeSwitched.apply { value = value.not() } }) {
+            Icon(
+                painterResource(Res.drawable.brightness),
+                "Switch theme"
+            )
+        }
+    }
+}
+
+@Composable
+fun MainTopBar(showTopAction: Boolean) {
+    val viewModel = koinInject<MainViewModel>()
+    val showFilterDialog = viewModel.showFilterDialog
     TopAppBar(
-        title = { Text("KMP Projects", color = MaterialTheme.colorScheme.onBackground) },
+        title = {
+            Text(
+                "KMP Projects Hub",
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        },
         actions = {
-            IconButton(onClick = { handler.openUri("https://github.com/KMP-Hub") }) {
-                Icon(
-                    painterResource(Res.drawable.github),
-                    "GitHub repo"
-                )
-            }
-            IconButton(onClick = { viewModel.themeSwitched.apply { value = value.not() } }) {
-                Icon(
-                    painterResource(Res.drawable.brightness),
-                    "GitHub repo"
-                )
+            if (showTopAction) {
+                IconButton(onClick = { showFilterDialog.apply { value = value.not() } }) {
+                    Icon(
+                        painterResource(Res.drawable.adjustment),
+                        "Filter adjustment"
+                    )
+                }
             }
         }
     )
