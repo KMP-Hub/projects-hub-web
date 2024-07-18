@@ -26,10 +26,11 @@ kotlin {
         }
         binaries.executable()
     }
-    
+
     sourceSets {
         commonMain.dependencies {
             val voyagerVersion = "1.1.0-beta02"
+            val koinVersion = "3.6.0-wasm-alpha2"
 
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -43,6 +44,8 @@ kotlin {
             implementation("io.ktor:ktor-client-content-negotiation:3.0.0-wasm1")
             implementation("cafe.adriel.voyager:voyager-screenmodel:$voyagerVersion")
             implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+            implementation("io.insert-koin:koin-core:${koinVersion}")
+            implementation("io.insert-koin:koin-compose:${koinVersion}")
         }
     }
 }

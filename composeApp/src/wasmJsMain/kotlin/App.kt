@@ -23,43 +23,47 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import domain.entities.Project
-import domain.entities.SupportedPlatform
 import kmp_project.composeapp.generated.resources.Res
 import kmp_project.composeapp.generated.resources.github
 import kmp_project.composeapp.generated.resources.search
+import modules.dataModule
+import modules.repositoryModule
+import modules.useCaseModule
+import modules.viewModelModule
 import org.jetbrains.compose.resources.painterResource
+import org.koin.compose.KoinApplication
 import ui.theme.darkScheme
 import ui.theme.lightScheme
 
 
 @Composable
 fun App() {
-    val screenWidth = LocalWindowInfo.current.containerSize.width.dp
-    val drawerState = rememberDrawerState(initialValue = DrawerValue.Open)
-    val scope = rememberCoroutineScope()
-    var projects by remember { mutableStateOf(emptyList<Project>()) }
-    val project = Project(
-        "HackerNews-KMP",
-        "This is a Hacker News reader app implemented using Kotlin Multiplatform Compose for Android and iOS.",
-        platforms = listOf(
-            SupportedPlatform.Android, SupportedPlatform.iOS, SupportedPlatform.Web, SupportedPlatform.Desktop
-        ),
-        url = "https://github.com/jarvislin/HackerNews-KMP",
-        tags = listOf("#foo", "#bar")
-    )
-    projects = listOf(
-        project, project, project, project, project
-    )
-    val colors = if (isSystemInDarkTheme()) {
-        darkScheme
-    } else {
-        lightScheme
-    }
+    KoinApplication(application = {
+        modules(
+            listOf(
+                dataModule,
+                repositoryModule,
+                useCaseModule,
+                viewModelModule
+            )
+        )
+    }) {
+        val screenWidth = LocalWindowInfo.current.containerSize.width.dp
+        val drawerState = rememberDrawerState(initialValue = DrawerValue.Open)
+        val scope = rememberCoroutineScope()
+        var projects by remember { mutableStateOf(emptyList<Project>()) }
 
-    MaterialTheme(colorScheme = colors) {
-        when (screenWidth) {
-            in 0.dp..1199.dp -> NarrowScreen(projects)
-            else -> StandardScreen(projects)
+        val colors = if (isSystemInDarkTheme()) {
+            darkScheme
+        } else {
+            lightScheme
+        }
+
+        MaterialTheme(colorScheme = colors) {
+            when (screenWidth) {
+                in 0.dp..1199.dp -> NarrowScreen(projects)
+                else -> StandardScreen(projects)
+            }
         }
     }
 }
