@@ -1,9 +1,7 @@
 @file:OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class
+    ExperimentalMaterial3Api::class
 )
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,11 +15,11 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.Navigator
 import domain.entities.Project
 import kmp_project.composeapp.generated.resources.Res
 import kmp_project.composeapp.generated.resources.github
@@ -32,6 +30,7 @@ import modules.useCaseModule
 import modules.viewModelModule
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.KoinApplication
+import presentation.screens.MainScreen
 import ui.theme.darkScheme
 import ui.theme.lightScheme
 
@@ -48,11 +47,6 @@ fun App() {
             )
         )
     }) {
-        val screenWidth = LocalWindowInfo.current.containerSize.width.dp
-        val drawerState = rememberDrawerState(initialValue = DrawerValue.Open)
-        val scope = rememberCoroutineScope()
-        var projects by remember { mutableStateOf(emptyList<Project>()) }
-
         val colors = if (isSystemInDarkTheme()) {
             darkScheme
         } else {
@@ -60,129 +54,14 @@ fun App() {
         }
 
         MaterialTheme(colorScheme = colors) {
-            when (screenWidth) {
-                in 0.dp..1199.dp -> NarrowScreen(projects)
-                else -> StandardScreen(projects)
-            }
+            Navigator(MainScreen())
         }
     }
 }
 
-@Composable
-fun NarrowScreen(projects: List<Project>) {
-    ContentWidget(projects)
-}
 
 @Composable
-fun StandardScreen(projects: List<Project>) {
-    var androidChecked by remember { mutableStateOf(true) }
-    var iosChecked by remember { mutableStateOf(true) }
-    var desktopChecked by remember { mutableStateOf(true) }
-    var webChecked by remember { mutableStateOf(true) }
-    var libraryChecked by remember { mutableStateOf(true) }
-    var showcaseChecked by remember { mutableStateOf(true) }
-    var frameworkChecked by remember { mutableStateOf(true) }
-    var otherChecked by remember { mutableStateOf(true) }
-
-    PermanentNavigationDrawer(
-        modifier = Modifier.background(MaterialTheme.colorScheme.background),
-        drawerContent = {
-            ModalDrawerSheet(modifier = Modifier.width(240.dp)) {
-                Text("Platforms", modifier = Modifier.padding(16.dp))
-                HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp))
-                NavigationDrawerItem(
-                    label = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(androidChecked, onCheckedChange = { androidChecked = it })
-                            Text(text = "Android")
-                        }
-                    },
-                    selected = false,
-                    onClick = { androidChecked = androidChecked.not() }
-                )
-                NavigationDrawerItem(
-                    label = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(iosChecked, onCheckedChange = { iosChecked = it })
-                            Text(text = "iOS")
-                        }
-                    },
-                    selected = false,
-                    onClick = { iosChecked = iosChecked.not() }
-                )
-                NavigationDrawerItem(
-                    label = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(desktopChecked, onCheckedChange = { desktopChecked = it })
-                            Text(text = "Desktop")
-                        }
-                    },
-                    selected = false,
-                    onClick = { desktopChecked = desktopChecked.not() }
-                )
-                NavigationDrawerItem(
-                    label = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(webChecked, onCheckedChange = { webChecked = it })
-                            Text(text = "Web")
-                        }
-                    },
-                    selected = false,
-                    onClick = { webChecked = webChecked.not() }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Types", modifier = Modifier.padding(16.dp))
-                HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp))
-                NavigationDrawerItem(
-                    label = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(libraryChecked, onCheckedChange = { libraryChecked = it })
-                            Text(text = "Library")
-                        }
-                    },
-                    selected = false,
-                    onClick = { libraryChecked = libraryChecked.not() }
-                )
-                NavigationDrawerItem(
-                    label = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(showcaseChecked, onCheckedChange = { showcaseChecked = it })
-                            Text(text = "Showcase")
-                        }
-                    },
-                    selected = false,
-                    onClick = { showcaseChecked = showcaseChecked.not() }
-                )
-                NavigationDrawerItem(
-                    label = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(frameworkChecked, onCheckedChange = { frameworkChecked = it })
-                            Text(text = "Framework")
-                        }
-                    },
-                    selected = false,
-                    onClick = { frameworkChecked = frameworkChecked.not() }
-                )
-                NavigationDrawerItem(
-                    label = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(otherChecked, onCheckedChange = { otherChecked = it })
-                            Text(text = "Other")
-                        }
-                    },
-                    selected = false,
-                    onClick = { otherChecked = otherChecked.not() }
-                )
-            }
-        }
-    ) {
-        // Screen content
-        ContentWidget(projects)
-    }
-}
-
-@Composable
-fun ContentWidget(projects: List<Project>) {
+fun ContentWidget(projects: List<Project>, showTopActions: Boolean) {
     val inputValue = remember { mutableStateOf(TextFieldValue()) }
     Scaffold(topBar = { MainTopBar() }) { paddingValues ->
         Column(
@@ -220,7 +99,12 @@ fun MainTopBar() {
     TopAppBar(
         title = { Text("KMP Projects", color = MaterialTheme.colorScheme.onBackground) },
         actions = {
-            IconButton(onClick = { handler.openUri("") }) { Icon(painterResource(Res.drawable.github), "GitHub repo") }
+            IconButton(onClick = { handler.openUri("https://github.com/KMP-Hub") }) {
+                Icon(
+                    painterResource(Res.drawable.github),
+                    "GitHub repo"
+                )
+            }
         }
     )
 }

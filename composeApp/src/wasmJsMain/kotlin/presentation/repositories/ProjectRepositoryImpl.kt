@@ -5,13 +5,14 @@ import domain.repositories.ProjectRepository
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import kotlinx.serialization.json.Json
 
 class ProjectRepositoryImpl(private val json: Json, private val client: HttpClient) : ProjectRepository {
     override suspend fun fetchProjects(): Result<List<Project>> {
         try {
-            val response = client.get(JSON_URL).body<List<Project>>()
-            return Result.success(response)
+            val response = client.get(JSON_URL).bodyAsText()
+            return Result.success(json.decodeFromString<List<Project>>(response))
         } catch (e: Exception) {
             return Result.failure(e)
         }
