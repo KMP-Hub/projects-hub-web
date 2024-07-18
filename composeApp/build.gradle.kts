@@ -31,6 +31,7 @@ kotlin {
         commonMain.dependencies {
             val voyagerVersion = "1.1.0-beta02"
             val koinVersion = "3.6.0-wasm-alpha2"
+            val serialization_version = "1.7.1"
 
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -39,6 +40,7 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
 
+            implementation ("org.jetbrains.kotlinx:kotlinx-serialization-json:$serialization_version")
             implementation("io.ktor:ktor-client-core:3.0.0-wasm1")
             implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.0-wasm1")
             implementation("io.ktor:ktor-client-content-negotiation:3.0.0-wasm1")
