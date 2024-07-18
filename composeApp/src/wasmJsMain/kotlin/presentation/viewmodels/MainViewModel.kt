@@ -20,6 +20,8 @@ class MainViewModel(private val repository: ProjectRepository) : ScreenModel {
     val showFilterDialog = mutableStateOf(false)
     val platformChecks = mutableStateOf(PlatformCheckState())
     val typeChecks = mutableStateOf(TypeCheckState())
+    val dialogSelectedPlatformChecks = mutableStateOf(PlatformCheckState())
+    val dialogSelectedTypeChecks = mutableStateOf(TypeCheckState())
 
     fun loadProjects() {
         loading.value = true
@@ -82,6 +84,25 @@ class MainViewModel(private val repository: ProjectRepository) : ScreenModel {
     fun applySearchKeyword(newValue: TextFieldValue) {
         searchKeyword.value = newValue
         filter()
+    }
+
+    fun submitSelectedPlatforms(state: PlatformCheckState) {
+        dialogSelectedPlatformChecks.value = state
+    }
+
+    fun submitSelectedTypes(state: TypeCheckState) {
+        dialogSelectedTypeChecks.value = state
+    }
+
+    fun applySelectedFilter() {
+        platformChecks.value = dialogSelectedPlatformChecks.value
+        typeChecks.value = dialogSelectedTypeChecks.value
+        filter()
+    }
+
+    fun cancelFilter() {
+        dialogSelectedPlatformChecks.value = platformChecks.value
+        dialogSelectedTypeChecks.value = typeChecks.value
     }
 }
 

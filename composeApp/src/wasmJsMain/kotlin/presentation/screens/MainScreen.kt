@@ -194,7 +194,7 @@ fun ContentWidget(projects: List<Project>, showTopAction: Boolean) {
 }
 
 @Composable
-fun FilterCheckboxItem(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
+fun DialogCheckboxItem(label: String, checked: Boolean, onCheckedChange: (Boolean) -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Checkbox(checked, onCheckedChange = onCheckedChange)
         Text(label)
@@ -204,6 +204,8 @@ fun FilterCheckboxItem(label: String, checked: Boolean, onCheckedChange: (Boolea
 @Composable
 fun FilterDialog() {
     val viewModel = koinInject<MainViewModel>()
+    val dialogPlatformChecks = viewModel.dialogSelectedPlatformChecks
+    val dialogSelectedTypes = viewModel.dialogSelectedTypeChecks
     BasicAlertDialog(
         modifier = Modifier.defaultMinSize(minWidth = 280.dp)
             .background(color = MaterialTheme.colorScheme.surfaceContainerHigh, shape = RoundedCornerShape(28.dp)),
@@ -212,30 +214,47 @@ fun FilterDialog() {
     ) {
         Column(modifier = Modifier.padding(24.dp)) {
             Text("Filters", fontSize = MaterialTheme.typography.headlineSmall.fontSize)
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Checkbox(false, onCheckedChange = {})
-                Text(SupportedPlatform.Android.name)
+            Spacer(modifier = Modifier.height(8.dp))
+            // platform
+            DialogCheckboxItem(SupportedPlatform.Android.name, dialogPlatformChecks.value.androidChecked) { newState ->
+                viewModel.submitSelectedPlatforms(dialogPlatformChecks.value.copy(androidChecked = newState))
             }
-            Row {
-                Checkbox(false, onCheckedChange = {})
-                Text("Android")
+            DialogCheckboxItem(SupportedPlatform.iOS.name, dialogPlatformChecks.value.iosChecked) { newState ->
+                viewModel.submitSelectedPlatforms(dialogPlatformChecks.value.copy(iosChecked = newState))
             }
-            Row {
-                Checkbox(false, onCheckedChange = {})
-                Text("Android")
+            DialogCheckboxItem(SupportedPlatform.Desktop.name, dialogPlatformChecks.value.desktopChecked) { newState ->
+                viewModel.submitSelectedPlatforms(dialogPlatformChecks.value.copy(desktopChecked = newState))
             }
-            Row {
-                Checkbox(false, onCheckedChange = {})
-                Text("Android")
+            DialogCheckboxItem(SupportedPlatform.Web.name, dialogPlatformChecks.value.webChecked) { newState ->
+                viewModel.submitSelectedPlatforms(dialogPlatformChecks.value.copy(webChecked = newState))
             }
-            Row {
-                Checkbox(false, onCheckedChange = {})
-                Text("Android")
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            // type
+            DialogCheckboxItem(ProjectType.Library.name, dialogSelectedTypes.value.libraryChecked) { newState ->
+                viewModel.submitSelectedTypes(dialogSelectedTypes.value.copy(libraryChecked = newState))
+            }
+            DialogCheckboxItem(ProjectType.Showcase.name, dialogSelectedTypes.value.showcaseChecked) { newState ->
+                viewModel.submitSelectedTypes(dialogSelectedTypes.value.copy(showcaseChecked = newState))
+            }
+            DialogCheckboxItem(ProjectType.Framework.name, dialogSelectedTypes.value.frameworkChecked) { newState ->
+                viewModel.submitSelectedTypes(dialogSelectedTypes.value.copy(frameworkChecked = newState))
+            }
+            DialogCheckboxItem(ProjectType.Tool.name, dialogSelectedTypes.value.toolChecked) { newState ->
+                viewModel.submitSelectedTypes(dialogSelectedTypes.value.copy(toolChecked = newState))
+            }
+            DialogCheckboxItem(ProjectType.Other.name, dialogSelectedTypes.value.otherChecked) { newState ->
+                viewModel.submitSelectedTypes(dialogSelectedTypes.value.copy(otherChecked = newState))
             }
             Row(modifier = Modifier.align(Alignment.End)) {
-                TextButton(onClick = { viewModel.showFilterDialog.value = false }) { Text("Cancel") }
+                TextButton(onClick = {
+                    viewModel.showFilterDialog.value = false
+                    viewModel.cancelFilter()
+                }) { Text("Cancel") }
                 Spacer(modifier = Modifier.width(8.dp))
-                TextButton(onClick = { viewModel.showFilterDialog.value = false }) { Text("Apply") }
+                TextButton(onClick = {
+                    viewModel.showFilterDialog.value = false
+                    viewModel.applySelectedFilter()
+                }) { Text("Apply") }
             }
         }
     }
