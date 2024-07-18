@@ -269,7 +269,7 @@ fun MainBottomBar() {
         IconButton(onClick = { handler.openUri("https://github.com/KMP-Hub") }) {
             Icon(
                 painterResource(Res.drawable.github),
-                "GitHub repo"
+                "GitHub"
             )
         }
         IconButton(onClick = { viewModel.themeSwitched.apply { value = value.not() } }) {
@@ -319,7 +319,7 @@ fun ItemWidget(project: Project) {
             )
             Text(project.description, fontSize = MaterialTheme.typography.bodyLarge.fontSize)
             Text(
-                project.tags.joinToString("  "),
+                project.tags.joinToString(prefix = "#", separator = ", #"),
                 fontSize = MaterialTheme.typography.bodySmall.fontSize
             )
             LazyRow(modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp, top = 8.dp)) {
