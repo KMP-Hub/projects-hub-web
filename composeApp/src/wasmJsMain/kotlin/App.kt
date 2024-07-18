@@ -79,6 +79,11 @@ fun StandardScreen(projects: List<Project>) {
     var iosChecked by remember { mutableStateOf(true) }
     var desktopChecked by remember { mutableStateOf(true) }
     var webChecked by remember { mutableStateOf(true) }
+    var libraryChecked by remember { mutableStateOf(true) }
+    var showcaseChecked by remember { mutableStateOf(true) }
+    var frameworkChecked by remember { mutableStateOf(true) }
+    var otherChecked by remember { mutableStateOf(true) }
+
     PermanentNavigationDrawer(
         modifier = Modifier.background(MaterialTheme.colorScheme.background),
         drawerContent = {
@@ -124,6 +129,49 @@ fun StandardScreen(projects: List<Project>) {
                     },
                     selected = false,
                     onClick = { webChecked = webChecked.not() }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Types", modifier = Modifier.padding(16.dp))
+                HorizontalDivider(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp))
+                NavigationDrawerItem(
+                    label = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(libraryChecked, onCheckedChange = { libraryChecked = it })
+                            Text(text = "Library")
+                        }
+                    },
+                    selected = false,
+                    onClick = { libraryChecked = libraryChecked.not() }
+                )
+                NavigationDrawerItem(
+                    label = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(showcaseChecked, onCheckedChange = { showcaseChecked = it })
+                            Text(text = "Showcase")
+                        }
+                    },
+                    selected = false,
+                    onClick = { showcaseChecked = showcaseChecked.not() }
+                )
+                NavigationDrawerItem(
+                    label = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(frameworkChecked, onCheckedChange = { frameworkChecked = it })
+                            Text(text = "Framework")
+                        }
+                    },
+                    selected = false,
+                    onClick = { frameworkChecked = frameworkChecked.not() }
+                )
+                NavigationDrawerItem(
+                    label = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(otherChecked, onCheckedChange = { otherChecked = it })
+                            Text(text = "Other")
+                        }
+                    },
+                    selected = false,
+                    onClick = { otherChecked = otherChecked.not() }
                 )
             }
         }
