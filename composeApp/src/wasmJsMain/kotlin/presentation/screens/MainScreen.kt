@@ -160,31 +160,39 @@ fun ContentWidget(projects: List<Project>, showTopAction: Boolean) {
     val viewModel = koinInject<MainViewModel>()
     val showFilterDialog by viewModel.showFilterDialog
     val searchKeyword by viewModel.searchKeyword
-    Scaffold(topBar = { MainTopBar(showTopAction) }, bottomBar = { MainBottomBar() }) { paddingValues ->
-        Column(
-            Modifier.fillMaxWidth().padding(
-                top = paddingValues.calculateTopPadding(),
-                bottom = paddingValues.calculateBottomPadding()
-            ), horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            TextField(
-                value = searchKeyword,
-                onValueChange = { newValue -> viewModel.applySearchKeyword(newValue) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp),
-                singleLine = true,
-                shape = CircleShape,
-                label = { Text("Type to search...") },
-                leadingIcon = { Icon(painterResource(Res.drawable.search), null) },
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
+    val loading by viewModel.loading
+
+    Scaffold(topBar = { MainTopBar(showTopAction) }) { paddingValues ->
+        Box(Modifier.fillMaxSize()) {
+            Column(
+                Modifier.fillMaxWidth().padding(
+                    top = paddingValues.calculateTopPadding(),
+                    bottom = paddingValues.calculateBottomPadding()
+                ), horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                TextField(
+                    value = searchKeyword,
+                    onValueChange = { newValue -> viewModel.applySearchKeyword(newValue) },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 16.dp),
+                    singleLine = true,
+                    shape = CircleShape,
+                    label = { Text("Type to search...") },
+                    leadingIcon = { Icon(painterResource(Res.drawable.search), null) },
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    )
                 )
-            )
-            LazyColumn {
-                items(projects) {
-                    ItemWidget(it)
+                LazyColumn {
+                    items(projects) {
+                        ItemWidget(it)
+                    }
                 }
+            }
+
+            if (loading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
         }
 
@@ -262,29 +270,10 @@ fun FilterDialog() {
 }
 
 @Composable
-fun MainBottomBar() {
-    val viewModel = koinInject<MainViewModel>()
-    val handler = LocalUriHandler.current
-    BottomAppBar {
-        IconButton(onClick = { handler.openUri("https://github.com/KMP-Hub") }) {
-            Icon(
-                painterResource(Res.drawable.github),
-                "GitHub"
-            )
-        }
-        IconButton(onClick = { viewModel.themeSwitched.apply { value = value.not() } }) {
-            Icon(
-                painterResource(Res.drawable.brightness),
-                "Switch theme"
-            )
-        }
-    }
-}
-
-@Composable
-fun MainTopBar(showTopAction: Boolean) {
+fun MainTopBar(showTopFilterAction: Boolean) {
     val viewModel = koinInject<MainViewModel>()
     val showFilterDialog = viewModel.showFilterDialog
+    val handler = LocalUriHandler.current
     TopAppBar(
         title = {
             Text(
@@ -293,11 +282,23 @@ fun MainTopBar(showTopAction: Boolean) {
             )
         },
         actions = {
-            if (showTopAction) {
+            IconButton(onClick = { handler.openUri("https://github.com/KMP-Hub") }) {
+                Icon(
+                    painterResource(Res.drawable.github),
+                    "GitHub"
+                )
+            }
+            IconButton(onClick = { viewModel.themeSwitched.apply { value = value.not() } }) {
+                Icon(
+                    painterResource(Res.drawable.brightness),
+                    "Switch theme"
+                )
+            }
+            if (showTopFilterAction) {
                 IconButton(onClick = { showFilterDialog.apply { value = value.not() } }) {
                     Icon(
                         painterResource(Res.drawable.adjustment),
-                        "Filter adjustment"
+                        "Filters"
                     )
                 }
             }
