@@ -317,7 +317,7 @@ fun ItemWidget(project: Project) {
                 modifier = Modifier.padding(top = 12.dp),
                 fontSize = MaterialTheme.typography.headlineMedium.fontSize
             )
-            Text(project.description, fontSize = MaterialTheme.typography.bodyLarge.fontSize)
+            project.description?.let { Text(it, fontSize = MaterialTheme.typography.bodyLarge.fontSize) }
             Text(
                 project.tags.joinToString(prefix = "#", separator = ", #"),
                 fontSize = MaterialTheme.typography.bodySmall.fontSize

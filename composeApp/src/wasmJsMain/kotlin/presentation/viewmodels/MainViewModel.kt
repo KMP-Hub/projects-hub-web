@@ -75,7 +75,7 @@ class MainViewModel(private val repository: ProjectRepository) : ScreenModel {
         if (text.trim().isNotEmpty()) {
             this.filteredProjects.value = filteredProjects.filter {
                 it.name.contains(text) ||
-                        it.description.contains(text) ||
+                        it.description?.contains(text) == true ||
                         it.tags.any { it.contains(text) }
             }
         } else {
