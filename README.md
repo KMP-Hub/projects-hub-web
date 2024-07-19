@@ -1,4 +1,6 @@
-This is a Kotlin Multiplatform project targeting Web.
+# Projects Hub - Web
+
+This is a Kotlin Multiplatform project targeting web, designed to showcase collected information about KMP projects.
 
 * `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
   It contains several subfolders:
