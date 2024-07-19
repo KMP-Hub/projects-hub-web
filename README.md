@@ -1,6 +1,11 @@
 # Projects Hub - Web
 
-This is a Kotlin Multiplatform project targeting web, designed to showcase collected information about KMP projects.
+## About
+
+Inspired by Flutter's [pub.dev](https://pub.dev/), we believe Kotlin Multiplatform deserves a similar platform. Our goal is to make it easier for newcomers to find information and to help showcase outstanding projects to a broader audience.
+
+## Info
+This is a Kotlin Multiplatform project targeting web.
 
 * `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
   It contains several subfolders:
