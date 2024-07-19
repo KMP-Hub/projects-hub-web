@@ -19,6 +19,6 @@ class ProjectRepositoryImpl(private val json: Json, private val client: HttpClie
     }
 
     companion object {
-        const val JSON_URL = "https://raw.githubusercontent.com/KMP-Hub/Project-Hub-Data/main/projects.json"
+        const val JSON_URL = "https://raw.githubusercontent.com/KMP-Hub/projects-hub-data/main/projects.json"
     }
 }
